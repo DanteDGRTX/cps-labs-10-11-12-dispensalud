@@ -9,3 +9,6 @@ Proyectos Maven independientes para pruebas unitarias, acceso a datos e integrac
 - `Lab12-petclinic_integration_test`: API REST CRUD sobre H2 con seis suites MockMvc y pruebas de controlador con Mockito.
 
 Cada carpeta contiene su propio `README.md`, wrapper Maven y capturas de IntelliJ.
+
+
+Repositorio público: https://github.com/DanteDGRTX/cps-labs-10-11-12-dispensalud
