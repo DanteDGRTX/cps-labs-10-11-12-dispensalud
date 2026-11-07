@@ -10,3 +10,6 @@ Aplicación Spring Boot 3 con H2, MockMvc y Mockito. Incluye CRUD para veterinar
 ```
 
 `application.yml` selecciona el perfil `h2`; el perfil mantiene una base en memoria para que cada ejecución sea reproducible. Owner incluye `consentimiento_informado` como extensión DispenSalud.
+
+
+Repositorio público: https://github.com/DanteDGRTX/cps-labs-10-11-12-dispensalud
