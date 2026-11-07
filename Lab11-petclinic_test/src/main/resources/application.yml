@@ -1,0 +1,13 @@
+spring:
+  profiles:
+    active: h2
+  datasource:
+    url: jdbc:h2:mem:petclinic;MODE=MySQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always
+  h2:
+    console:
+      enabled: true
