@@ -10,16 +10,15 @@
 # UNIX or MAC
 spring:
   datasource :
-    url : jdbc:mysql://localhost:3306/PETCLINIC_DB?useSSL=false
-    # Windows
-    # url : jdbc:mysql://localhost:3306/PETCLINIC_DB?useSSL=false&serverTimezone=UTC
+    url : jdbc:mysql://localhost:3306/PETCLINIC_DB?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username : root
-    password :
+    password : ${PETCLINIC_MYSQL_PASSWORD:petclinicLocalPass}
 
   sql:
     init:
       mode: always
-      platform: mysql
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
 
   data :
     rest :

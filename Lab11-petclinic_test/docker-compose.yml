@@ -1,0 +1,14 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: petclinic-lab11-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: petclinicLocalPass
+      MYSQL_DATABASE: PETCLINIC_DB
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-ppetclinicLocalPass"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
