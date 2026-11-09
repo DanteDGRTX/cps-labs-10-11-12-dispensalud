@@ -1,15 +1,64 @@
 package com.tecsup.petclinic.services;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import com.tecsup.petclinic.entities.Vet;
+import com.tecsup.petclinic.exception.VetNotFoundException;
 
-class VetServiceTest extends JdbcTestSupport {
-    private static final Logger log = LoggerFactory.getLogger(VetServiceTest.class);
-    @Test void testCreateVet() { jdbc.update("INSERT INTO vets(id,first_name,last_name,email) VALUES(101,'Ana','Rios','ana@test')"); assertThat(rows("vets"), greaterThan(1)); }
-    @Test void testUpdateVet() { jdbc.update("INSERT INTO vets(id,first_name,last_name,email) VALUES(102,'Ana','Rios','ana@test')"); jdbc.update("UPDATE vets SET last_name='Vega' WHERE id=102"); assertThat(jdbc.queryForObject("SELECT last_name FROM vets WHERE id=102", String.class), is("Vega")); }
-    @Test void testFindVetByIdAndLastName() { jdbc.update("INSERT INTO vets(id,first_name,last_name,email) VALUES(103,'Eva','Soto','eva@test')"); assertThat(jdbc.queryForObject("SELECT first_name FROM vets WHERE id=103", String.class), is("Eva")); assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM vets WHERE last_name='Soto'", Integer.class), is(1)); log.info("Vet encontrado por id y apellido"); }
-    @Test void testDeleteVet() { jdbc.update("INSERT INTO vets(id,first_name,last_name,email) VALUES(104,'Ian','Paz','ian@test')"); jdbc.update("DELETE FROM vets WHERE id=104"); assertThat(rows("vets"), greaterThan(0)); assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM vets WHERE id=104", Integer.class), is(0)); }
+@SpringBootTest
+public class VetServiceTest {
+    private static final Logger logger = LoggerFactory.getLogger(VetServiceTest.class);
+
+    @Autowired
+    private VetService vetService;
+
+    @Test
+    public void testFindVetById() throws VetNotFoundException {
+        Vet vet = vetService.findById(1L);
+        logger.info("[CASO 1] Vet encontrado: " + vet);
+        assertThat(vet.getFirstName(), is("James"));
+        assertThat(vet.getLastName(), is("Carter"));
+    }
+
+    @Test
+    public void testFindVetByLastName() {
+        List<Vet> vets = vetService.findByLastName("Leary");
+        assertThat(vets.size(), is(1));
+    }
+
+    @Test
+    public void testCreateVet() {
+        Vet vet = new Vet("Ronal", "Gonzales");
+        Vet created = vetService.create(vet);
+        logger.info("[CASO 1] Vet creado: " + created);
+        assertThat(created.getId(), notNullValue());
+        assertThat(created.getFirstName(), is("Ronal"));
+    }
+
+    @Test
+    public void testUpdateVet() {
+        Vet created = vetService.create(new Vet("Ronal", "Gonzales"));
+        created.setFirstName("Ronal Dante");
+        Vet updated = vetService.update(created);
+        assertThat(updated.getFirstName(), is("Ronal Dante"));
+    }
+
+    @Test
+    public void testDeleteVet() throws VetNotFoundException {
+        Vet created = vetService.create(new Vet("Temporal", "Vet"));
+        vetService.delete(created.getId());
+        try {
+            vetService.findById(created.getId());
+            assertThat(true, is(false));
+        } catch (VetNotFoundException e) {
+            assertThat(true, is(true));
+        }
+    }
 }

@@ -1,15 +1,57 @@
 package com.tecsup.petclinic.services;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import com.tecsup.petclinic.entities.Owner;
+import com.tecsup.petclinic.exception.OwnerNotFoundException;
 
-class OwnerServiceTest extends JdbcTestSupport {
-    private static final Logger log = LoggerFactory.getLogger(OwnerServiceTest.class);
-    @Test void testCreateOwner() { jdbc.update("INSERT INTO owners(id,first_name,last_name,city) VALUES(101,'Rosa','Mamani','Lima')"); assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM owners WHERE id=101", Integer.class), is(1)); }
-    @Test void testUpdateOwner() { jdbc.update("INSERT INTO owners(id,first_name,last_name,city) VALUES(102,'Rosa','Mamani','Lima')"); jdbc.update("UPDATE owners SET city='Cusco' WHERE id=102"); assertThat(jdbc.queryForObject("SELECT city FROM owners WHERE id=102", String.class), is("Cusco")); }
-    @Test void testFindOwnerByIdNameAndCity() { assertThat(jdbc.queryForObject("SELECT first_name FROM owners WHERE id=1", String.class), is("Leo")); assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM owners WHERE city='Lima'", Integer.class), is(1)); log.info("Owner encontrado por id, nombre y ciudad"); }
-    @Test void testDeleteOwner() { jdbc.update("INSERT INTO owners(id,first_name,last_name,city) VALUES(104,'Mia','Paz','Lima')"); jdbc.update("DELETE FROM owners WHERE id=104"); assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM owners WHERE id=104", Integer.class), is(0)); }
+@SpringBootTest
+public class OwnerServiceTest {
+    @Autowired
+    private OwnerService ownerService;
+
+    @Test
+    public void testFindOwnerById() throws OwnerNotFoundException {
+        Owner owner = ownerService.findById(1L);
+        assertThat(owner.getFirstName(), is("George"));
+    }
+
+    @Test
+    public void testFindOwnerByLastName() {
+        List<Owner> owners = ownerService.findByLastName("Davis");
+        assertThat(owners.size(), is(2));
+    }
+
+    @Test
+    public void testCreateOwner() {
+        Owner owner = new Owner("Carlos", "Mamani", "Av. Ejercito 410", "Arequipa", "959441122");
+        Owner created = ownerService.create(owner);
+        assertThat(created.getId(), notNullValue());
+        assertThat(created.getCity(), is("Arequipa"));
+    }
+
+    @Test
+    public void testUpdateOwner() {
+        Owner created = ownerService.create(new Owner("Carlos", "Mamani", "Av. Ejercito 410", "Arequipa", "959441122"));
+        created.setCity("Cerro Colorado - Arequipa");
+        Owner updated = ownerService.update(created);
+        assertThat(updated.getCity(), is("Cerro Colorado - Arequipa"));
+    }
+
+    @Test
+    public void testDeleteOwner() throws OwnerNotFoundException {
+        Owner created = ownerService.create(new Owner("Rosa", "Mamani", "Calle Melgar 205", "Arequipa", "958112233"));
+        ownerService.delete(created.getId());
+        try {
+            ownerService.findById(created.getId());
+            assertThat(true, is(false));
+        } catch (OwnerNotFoundException e) {
+            assertThat(true, is(true));
+        }
+    }
 }

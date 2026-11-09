@@ -1,12 +1,50 @@
 package com.tecsup.petclinic.services;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import com.tecsup.petclinic.entities.Specialty;
+import com.tecsup.petclinic.exception.SpecialtyNotFoundException;
 
-class SpecialtyServiceTest extends JdbcTestSupport {
-    @Test void testCreateSpecialty() { jdbc.update("INSERT INTO specialties(id,name) VALUES(101,'Oftalmologia')"); assertThat(jdbc.queryForObject("SELECT name FROM specialties WHERE id=101", String.class), is("Oftalmologia")); }
-    @Test void testUpdateSpecialty() { jdbc.update("INSERT INTO specialties(id,name) VALUES(102,'General')"); jdbc.update("UPDATE specialties SET name='Cirugia' WHERE id=102"); assertThat(jdbc.queryForObject("SELECT name FROM specialties WHERE id=102", String.class), is("Cirugia")); }
-    @Test void testFindSpecialtyById() { assertThat(jdbc.queryForObject("SELECT name FROM specialties WHERE id=1", String.class), is("Cardiología")); }
-    @Test void testDeleteSpecialty() { jdbc.update("INSERT INTO specialties(id,name) VALUES(104,'Temporal')"); jdbc.update("DELETE FROM specialties WHERE id=104"); assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM specialties WHERE id=104", Integer.class), is(0)); }
+@SpringBootTest
+public class SpecialtyServiceTest {
+    @Autowired
+    private SpecialtyService specialtyService;
+
+    @Test
+    public void testFindSpecialtyById() throws SpecialtyNotFoundException {
+        Specialty sp = specialtyService.findById(1L);
+        assertThat(sp.getName(), is("radiology"));
+    }
+
+    @Test
+    public void testCreateSpecialty() {
+        Specialty sp = new Specialty("geriatria_farmacologica");
+        Specialty created = specialtyService.create(sp);
+        assertThat(created.getId(), notNullValue());
+        assertThat(created.getName(), is("geriatria_farmacologica"));
+    }
+
+    @Test
+    public void testUpdateSpecialty() {
+        Specialty created = specialtyService.create(new Specialty("compartimento_1_led"));
+        created.setName("compartimento_1_led_azul_activo");
+        Specialty updated = specialtyService.update(created);
+        assertThat(updated.getName(), is("compartimento_1_led_azul_activo"));
+    }
+
+    @Test
+    public void testDeleteSpecialty() throws SpecialtyNotFoundException {
+        Specialty created = specialtyService.create(new Specialty("temp_specialty"));
+        specialtyService.delete(created.getId());
+        try {
+            specialtyService.findById(created.getId());
+            assertThat(true, is(false));
+        } catch (SpecialtyNotFoundException e) {
+            assertThat(true, is(true));
+        }
+    }
 }
