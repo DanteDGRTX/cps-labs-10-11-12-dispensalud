@@ -29,3 +29,8 @@ casos 4–6 (27 en total).
 
 La configuración local de MySQL está en `docker-compose.yml` y `src/main/resources/application-mysql.yml`.
 Al finalizar, puedes apagar el contenedor con `docker compose down`.
+
+**Estado de este equipo:** Docker Desktop informa que el hipervisor de Windows no está iniciado, por lo
+que MySQL no puede arrancar aquí todavía. Las dos corridas H2 de arriba sí están verificadas. Para
+presentar evidencia rotulada como MySQL, primero hay que resolver el estado del hipervisor y reiniciar
+Windows; no uses las capturas H2 con una leyenda que diga MySQL.
